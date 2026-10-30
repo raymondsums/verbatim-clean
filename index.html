@@ -3897,7 +3897,26 @@ function syncFilters() {
   $('f-short').classList.toggle('on', F.short);
   $('f-short').setAttribute('aria-pressed', String(F.short));
   $('f-clear').hidden = !filtering();
+  fitSelects();
 }
+
+// Each filter is as wide as the choice showing in it, not its longest
+// option, so the row stays on one line. The open list can still
+// be wider than the box.
+function fitSelects() {
+  const m = fitSelects.m || (fitSelects.m = Object.assign(document.createElement('span'), { ariaHidden: 'true' }));
+  if (!m.isConnected) { m.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;left:-9999px;top:0'; document.body.append(m); }
+  for (const sel of document.querySelectorAll('#filters select')) {
+    if (!sel.offsetParent) continue;
+    const cs = getComputedStyle(sel);
+    for (const k of ['font', 'letterSpacing', 'textTransform']) m.style[k] = cs[k];
+    m.textContent = sel.selectedOptions[0] ? sel.selectedOptions[0].text : '';
+    sel.style.width = Math.ceil(m.getBoundingClientRect().width + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)
+      + parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth) + 2) + 'px';
+  }
+}
+addEventListener('resize', () => fitSelects());
+if (document.fonts) document.fonts.ready.then(() => fitSelects());
 
 function renderWatch() {
   document.querySelectorAll('#watch-tabs button').forEach(b => {
@@ -3911,6 +3930,7 @@ function renderWatch() {
   const tracker = WATCH.tab === 'applied';
   $('app-tools').hidden = !tracker;
   $('filters').hidden = tracker;
+  if (!tracker) fitSelects();
   if (tracker) { renderApps(); return; }
 
   // The applications can land first and call this; the jobs are not here yet.
