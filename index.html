@@ -194,7 +194,8 @@
   /* ── App shell: narrow sidebar, one view at a time */
   .app { display: flex; min-height: 100vh; }
   .side {
-    position: sticky; top: 0; height: 100vh; flex: none; width: var(--side-w, 196px);
+    /* dvh: on an iPad 100vh runs under Safari's toolbar and cut off the theme key */
+    position: sticky; top: 0; height: 100vh; height: 100dvh; flex: none; width: var(--side-w, 196px);
     background: var(--card); box-shadow: inset -1px 0 var(--line);
     padding: 16px 12px; display: flex; flex-direction: column; gap: 4px;
   }
@@ -366,7 +367,7 @@
 
   /* the detail pane */
   .detail {
-    position: sticky; top: 0; height: 100vh; overflow-y: auto; background: var(--card);
+    position: sticky; top: 0; height: 100vh; height: 100dvh; overflow-y: auto; background: var(--card);
     box-shadow: inset 1px 0 var(--line); padding: 0 0 40px; min-width: 0;
   }
   .d-top { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px;
@@ -755,7 +756,7 @@
   html.board body { color: var(--ink); }
 
   /* the sidebar */
-  html.board .side { background: var(--bg); box-shadow: inset -1px 0 var(--line); padding: 22px 16px; }
+  html.board .side { background: var(--bg); box-shadow: inset -1px 0 var(--line); padding: 22px 16px calc(22px + env(safe-area-inset-bottom)); }
   html.board .brand { font: 800 26px/1 var(--cond); text-transform: uppercase; letter-spacing: .01em; padding: 0 8px 20px; }
   html.board .brand svg { display: none; }
   html.board .nav { height: 40px; padding: 0 8px; border-radius: 6px; color: var(--ink-2);
