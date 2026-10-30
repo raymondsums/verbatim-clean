@@ -3,6 +3,21 @@
 # list. One company per line; lines starting with # are skipped.
 # For a big company with a team inside it, put words after a colon: the role
 # counts only when its title or posting mentions one of them.
-# The lines below are only examples. Edit or delete them.
-Example Labs
-Example Corp: Research, Applied AI
+# The lines below are a starting set of AI labs. Edit or delete them.
+Anthropic
+OpenAI
+Google DeepMind
+DeepMind
+Google: DeepMind
+Meta: FAIR, Meta AI, Superintelligence
+xAI
+Mistral AI
+Mistral
+Cohere
+Perplexity
+Character.ai
+Character AI
+Runway
+Pika
+Midjourney
+ElevenLabs
