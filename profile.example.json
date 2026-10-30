@@ -1,0 +1,53 @@
+{
+  "name": "Ada Lovelace",
+  "title": "Senior Product Designer",
+  "email": "ada@example.com",
+  "phone": "555 010 0100",
+  "location": "San Francisco, CA",
+  "portfolio": "example.com",
+  "linkedin": "linkedin.com/in/example",
+  "github": "github.com/example",
+  "years_of_experience": "8",
+  "resume_pdf": "~/Documents/Resume.pdf",
+  "_note_authorization": "Your own exact wording, or null. Never generated, never paraphrased, and left empty rather than guessed when a question does not clearly fit.",
+  "authorized_to_work_in_us": null,
+  "requires_sponsorship": null,
+  "work_authorization": null,
+  "sponsorship": null,
+  "education": [
+    {
+      "school": "Example University",
+      "degree": "M.S. Human-Computer Interaction",
+      "degree_type": "Master's Degree",
+      "discipline": "Human-Computer Interaction",
+      "start": "2016",
+      "end": "2018"
+    }
+  ],
+  "employment_history": [
+    {
+      "company": "Example Co",
+      "title": "Senior Product Designer",
+      "location": "San Francisco, CA",
+      "start": "Jun 2018",
+      "end": "Jun 2026"
+    }
+  ],
+  "_note_eeo": "Your standard choices, filled exactly as written. Anything these do not fit is skipped and flagged rather than guessed. Leave them null to be asked every time.",
+  "eeo": {
+    "gender": null,
+    "race_ethnicity": null,
+    "veteran_status": null,
+    "disability_status": null
+  },
+  "legal_name": "Augusta Ada King",
+  "legal_first_name": "Augusta Ada",
+  "legal_last_name": "King",
+  "preferred_name": "Ada",
+  "preferred_first_name": "Ada",
+  "preferred_last_name": "Lovelace",
+  "full_name_on_forms": "Ada Augusta Ada King",
+  "_note_claims": "Optional. never_claim: things you worked on but did not build or lead; drafts will never say you built, led or owned one. leave_out_skills: skills a tailored resume never lists.",
+  "never_claim": [],
+  "leave_out_skills": []
+}

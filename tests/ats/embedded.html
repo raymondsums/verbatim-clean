@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Embedded board replica</title>
+<style>
+  body { font: 14px/1.6 -apple-system, sans-serif; margin: 40px auto; max-width: 760px; color: #26262b; }
+  iframe { width: 100%; height: 900px; border: 1px solid #e6e6e2; border-radius: 10px; }
+  .note { background: #faf9f7; border: 1px solid #e6e6e2; border-radius: 10px; padding: 14px 16px; margin-bottom: 24px; }
+</style>
+</head>
+<body>
+<h1>Careers at Example Co</h1>
+
+<div class="note">
+  <strong>What this replica is for.</strong> The outer page has no form
+  fields at all; the application lives in the iframe below, the way a
+  company careers page embeds Greenhouse or Lever. Open the popup and press
+  Fill this application. It should fill the form inside the frame and report
+  real counts. Before the fix it reported "no form fields on this page",
+  because the outer page answered first with nothing.
+  <br><br>
+  This one has to be driven by hand with the extension loaded. The headless
+  runner cannot press a popup button.
+</div>
+
+<p>We are hiring a Senior Product Designer. Apply below.</p>
+
+<iframe src="/test/greenhouse" title="Application form"></iframe>
+</body>
+</html>

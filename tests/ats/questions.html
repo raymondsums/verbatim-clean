@@ -1,0 +1,39 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="job-toolkit-autotest" content="answers"><title>Senior Product Designer at Northwind</title>
+<style>
+  body { font: 15px/1.55 Georgia, serif; color: #222; background: #fafaf7; margin: 0; }
+  main { max-width: 640px; margin: 0 0 0 80px; padding: 32px 0 120px; }
+  @media (max-width: 900px) { main { margin: 0 auto; padding: 24px 16px 120px; } }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  .posting p { margin: 0 0 12px; }
+  .field { margin: 0 0 22px; }
+  label { display: block; font-weight: bold; margin-bottom: 6px; }
+  input[type=text], input[type=email], textarea { width: 100%; box-sizing: border-box; padding: 9px; border: 1px solid #bbb; font: inherit; }
+  textarea { min-height: 120px; }
+  .hint { color: #777; font-size: 13px; margin-top: 4px; }
+  button[type=submit] { font: inherit; padding: 10px 22px; }
+</style></head><body><main>
+<section class="posting">
+  <h1>Senior Product Designer</h1>
+  <p>Northwind · San Francisco, CA (Hybrid) · Full time</p>
+  <p>Northwind builds route planning software for delivery fleets. Dispatchers use it to plan the day, and drivers use our mobile app to follow the route, scan packages, and report problems from the road. We are a team of forty, and design sits close to engineering.</p>
+  <p>As a Senior Product Designer you will own the driver app end to end, from research with drivers in the depot to shipping in weekly releases. You will design for people who are moving, glancing at a phone mounted on the dash, and working in bad light and bad signal.</p>
+  <p>You have shipped mobile products used by people on the job. You prototype in code or with AI tools when a static mockup will not answer the question. You write clearly, and you are comfortable presenting tradeoffs to engineers and to the founders.</p>
+  <p>We care about safety first, fewer taps, and screens that work in a two second glance. We measure success by on time deliveries and how rarely drivers call dispatch for help.</p>
+  <p>Salary range $170,000 to $205,000. Hybrid, three days a week in our San Francisco office.</p>
+</section>
+
+<form id="application_form" onsubmit="event.preventDefault()">
+  <div class="field"><label for="first_name">First Name *</label><input type="text" id="first_name" name="first_name"></div>
+  <div class="field"><label for="last_name">Last Name *</label><input type="text" id="last_name" name="last_name"></div>
+  <div class="field"><label for="email">Email *</label><input type="email" id="email" name="email"></div>
+  <div class="field"><label for="resume">Resume *</label><input type="file" id="resume" name="resume"></div>
+  <div class="field"><label for="cover_letter_file">Cover Letter (upload)</label><input type="file" id="cover_letter_file" name="cover_letter_file"></div>
+  <div class="field"><label for="q_why">Why do you want to work at Northwind? *</label><textarea id="q_why" name="q_why"></textarea></div>
+  <div class="field"><label for="q_project">Tell us about a mobile product you designed from discovery through launch.</label><textarea id="q_project" name="q_project"></textarea></div>
+  <div class="field"><label for="q_eng">How do you work with engineers when a design is hard to build?</label><textarea id="q_eng" name="q_eng" maxlength="500" aria-describedby="q_eng_hint"></textarea><div class="hint" id="q_eng_hint">500 characters max</div></div>
+  <div class="field"><label for="q_improve">In one sentence, what would you change first in a driver app you have used? (max 40 words)</label><input type="text" id="q_improve" name="q_improve"></div>
+  <div class="field"><label for="q_salary">What are your salary expectations?</label><input type="text" id="q_salary" name="q_salary"></div>
+  <div class="field"><label for="q_cover">Anything else you'd like to share? A short cover letter is welcome.</label><textarea id="q_cover" name="q_cover"></textarea></div>
+  <button type="submit">Submit application</button>
+</form>
+</main></body></html>

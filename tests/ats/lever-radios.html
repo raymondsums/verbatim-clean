@@ -1,0 +1,29 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="job-toolkit-autotest" content="1"><title>Replica - Product Designer</title></head><body>
+<!-- Lever's custom questions: the question text sits in .application-label,
+     each option is a label wrapping its radio. -->
+<form>
+  <ul>
+  <li class="application-question"><div class="application-label"><div class="text">Full name<span class="required">✱</span></div></div>
+    <div class="application-field"><input type="text" name="name"></div></li>
+  <li class="application-question custom-question"><div class="application-label"><div class="text">Are you legally authorized to work in the United States?<span class="required">✱</span></div></div>
+    <div class="application-field"><ul data-qa="multiple-choice">
+      <li><label><input type="radio" name="cards[c1][field0]" value="Yes"><span class="application-answer-alternative">Yes</span></label></li>
+      <li><label><input type="radio" name="cards[c1][field0]" value="No"><span class="application-answer-alternative">No</span></label></li></ul></div></li>
+  <li class="application-question custom-question"><div class="application-label"><div class="text">Do you live with a disability?</div></div>
+    <div class="application-field"><ul data-qa="multiple-choice">
+      <li><label><input type="radio" name="cards[c1][field1]" value="a"><span class="application-answer-alternative">Yes, I Have A Disability, Or Have A History/Record Of Having A Disability</span></label></li>
+      <li><label><input type="radio" name="cards[c1][field1]" value="b"><span class="application-answer-alternative">No, I Don't Have A Disability, Or A History/Record Of Having A Disability</span></label></li>
+      <li><label><input type="radio" name="cards[c1][field1]" value="c"><span class="application-answer-alternative">Prefer not to disclose</span></label></li></ul></div></li>
+  <li class="application-question custom-question"><div class="application-label"><div class="text">What gender identity do you most closely identify with?</div></div>
+    <div class="application-field"><ul data-qa="multiple-choice">
+      <li><label><input type="radio" name="cards[c1][field2]" value="Man"><span class="application-answer-alternative">Man</span></label></li>
+      <li><label><input type="radio" name="cards[c1][field2]" value="Woman"><span class="application-answer-alternative">Woman</span></label></li></ul></div></li>
+  <li class="application-question custom-question"><div class="application-label"><div class="text">Please share your current availability, including start date.</div></div>
+    <div class="application-field"><textarea name="cards[c1][field3]"></textarea></div></li>
+  </ul>
+</form>
+<script type="application/json" id="expect">
+{"legally authorized": "Yes", "live with a disability": "No, I Don't Have A Disability, Or A History/Record Of Having A Disability",
+ "gender identity": "Man"}
+</script>
+</body></html>

@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="job-toolkit-autotest" content="1">
+<title>Widget replica</title>
+<style>
+  body { font: 14px/1.5 -apple-system, sans-serif; margin: 40px auto; max-width: 620px; color: #26262b; }
+  .field { margin-bottom: 22px; }
+  .field-label { display: block; font-weight: 600; margin-bottom: 6px; }
+  .control { border: 1px solid #ccc; border-radius: 6px; padding: 8px 10px; cursor: pointer; background: #fff; }
+  .control input { border: 0; outline: 0; width: 100%; font: inherit; }
+  .menu { border: 1px solid #ccc; border-top: 0; border-radius: 0 0 6px 6px; max-height: 160px; overflow: auto; }
+  .menu[hidden] { display: none; }
+  .opt { padding: 7px 10px; cursor: pointer; }
+  .opt:hover { background: #f0f0fa; }
+  input[type=text] { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+  button.wd { width: 100%; text-align: left; background: #fff; }
+</style>
+</head>
+<body>
+<h1>Widget replica</h1>
+<p>Stand-ins for the two shapes the scanner could not see before: a
+react-select style typable combobox, and a Workday style listbox button.
+Neither has a name or an id, which is the point.</p>
+
+<form>
+  <div class="field">
+    <label class="field-label" for="fn">First Name *</label>
+    <input type="text" id="fn" name="first_name">
+  </div>
+
+  <!-- react-select shape: label element, combobox input, no name or id -->
+  <div class="field" id="country-field">
+    <span class="field-label" id="country-label">How would you describe your gender identity?</span>
+    <div class="control" data-combo="country">
+      <input role="combobox" aria-expanded="false" aria-controls="country-menu"
+             aria-labelledby="country-label" placeholder="Select..." autocomplete="off">
+    </div>
+    <div class="menu" id="country-menu" role="listbox" hidden></div>
+  </div>
+
+  <div class="field" id="school-field">
+    <span class="field-label" id="school-label">How would you describe your racial/ethnic background?</span>
+    <div class="control" data-combo="school">
+      <input role="combobox" aria-expanded="false" aria-controls="school-menu"
+             aria-labelledby="school-label" placeholder="Select..." autocomplete="off">
+    </div>
+    <div class="menu" id="school-menu" role="listbox" hidden></div>
+  </div>
+
+  <!-- Workday shape: a button that opens a listbox, nothing typable -->
+  <div class="field" id="wd-field">
+    <span class="field-label" id="wd-label">Are you legally authorized to work in the United States?</span>
+    <button type="button" class="control wd" aria-haspopup="listbox"
+            aria-expanded="false" aria-controls="wd-menu" aria-labelledby="wd-label">
+      <span class="wd-text">Select One</span>
+    </button>
+    <div class="menu" id="wd-menu" role="listbox" hidden></div>
+  </div>
+</form>
+
+<script>
+const DATA = {
+  country: ["Male", "Female", "Non-binary", "I do not wish to answer"],
+  school: ["Asian", "Black or African American", "Hispanic or Latino", "White"],
+  wd: ["Yes", "No"],
+};
+
+// react-select style: opens on click, filters as you type, commits on pick
+for (const key of ["country", "school"]) {
+  const control = document.querySelector(`[data-combo="${key}"]`);
+  const input = control.querySelector("input");
+  const menu = document.getElementById(`${key}-menu`);
+  const render = () => {
+    const q = input.value.trim().toLowerCase();
+    menu.innerHTML = "";
+    for (const label of DATA[key].filter(o => o.toLowerCase().includes(q))) {
+      const opt = document.createElement("div");
+      opt.className = "opt";
+      opt.setAttribute("role", "option");
+      opt.textContent = label;
+      opt.addEventListener("mousedown", e => {
+        e.preventDefault();
+        input.value = label;
+        menu.hidden = true;
+        input.setAttribute("aria-expanded", "false");
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      menu.append(opt);
+    }
+  };
+  const open = () => { menu.hidden = false; input.setAttribute("aria-expanded", "true"); render(); };
+  control.addEventListener("mousedown", open);
+  control.addEventListener("click", open);
+  input.addEventListener("input", render);
+  input.addEventListener("keydown", render);
+}
+
+// Workday style: button toggles a listbox, the button's text is the value
+{
+  const btn = document.querySelector("#wd-field button");
+  const menu = document.getElementById("wd-menu");
+  const text = btn.querySelector(".wd-text");
+  btn.addEventListener("click", () => {
+    const showing = !menu.hidden;
+    menu.hidden = showing;
+    btn.setAttribute("aria-expanded", String(!showing));
+    if (showing) return;
+    menu.innerHTML = "";
+    for (const label of DATA.wd) {
+      const opt = document.createElement("div");
+      opt.className = "opt";
+      opt.setAttribute("role", "option");
+      opt.textContent = label;
+      opt.addEventListener("click", () => {
+        text.textContent = label;
+        menu.hidden = true;
+        btn.setAttribute("aria-expanded", "false");
+      });
+      menu.append(opt);
+    }
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="job-toolkit-autotest" content="1"><title>Job Application for Product Designer at Replica</title></head><body>
+<!-- Standing EEO answers against the other wordings forms use. Decline
+     options are never picked, and a list with no clear match stays empty. -->
+<form>
+  <div class="field"><label for="vet">Veteran Status</label>
+    <select id="vet"><option value="">Select...</option><option>Yes, I am a veteran</option><option>No, I am not a veteran</option><option>I don't wish to answer</option></select></div>
+  <div class="field"><label for="dis">I have a disability</label>
+    <select id="dis"><option value="">Select...</option><option>Yes</option><option>No</option><option>I prefer to self-describe</option></select></div>
+  <div class="field"><label for="ori">I identify my sexual orientation as</label>
+    <select id="ori"><option value="">Select...</option><option>Gay or Lesbian</option><option>Straight/Heterosexual</option><option>I don't wish to answer</option></select></div>
+  <div class="field"><label for="gid">What is your gender identity?</label>
+    <select id="gid"><option value="">Select...</option><option>Cisgender woman</option><option>Transgender man</option><option>Cisgender man</option><option>I don't wish to answer</option></select></div>
+  <div class="field"><label for="vet2">Please identify your veteran status.</label>
+    <select id="vet2"><option value="">Select...</option><option>I am not a veteran (I did not serve in the military)</option><option>I am a veteran and I belong to a classification of protected veterans</option><option>I don't wish to answer</option></select></div>
+  <fieldset><legend>Are you Hispanic/Latino?</legend>
+    <label><input type="radio" name="hisp" value="y"> Hispanic or Latino</label>
+    <label><input type="radio" name="hisp" value="n"> Not Hispanic or Latino</label>
+    <label><input type="radio" name="hisp" value="d"> Decline to self-identify</label></fieldset>
+  <fieldset><legend>Are you a protected veteran?</legend>
+    <label><input type="radio" name="pv" value="y"> Yes</label>
+    <label><input type="radio" name="pv" value="d"> I don't wish to answer</label></fieldset>
+</form>
+<script type="application/json" id="expect">
+{"Veteran Status": "No, I am not a veteran", "I have a disability": "No", "sexual orientation": "Straight/Heterosexual",
+ "gender identity": "Cisgender man", "Hispanic/Latino": "Not Hispanic or Latino", "protected veteran": "", "identify your veteran status": "I am not a veteran (I did not serve in the military)"}
+</script>
+</body></html>

@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="job-toolkit-autotest" content="1"><title>Replica - Product Designer</title>
+<style>body { font: 14px/1.5 -apple-system, sans-serif; margin: 40px auto; max-width: 620px; } .q { margin-bottom: 18px; }</style></head><body>
+<!-- "Select all that apply" sets: Lever names every box in a set alike,
+     Ashby names each box after its option. -->
+<form>
+  <ul>
+  <li class="application-question"><div class="application-label"><div class="text">Full name</div></div>
+    <div class="application-field"><input type="text" name="name"></div></li>
+  <li class="application-question"><div class="application-label"><div class="text">What are your pronouns? Select all that apply</div></div>
+    <div class="application-field"><ul data-qa="checkboxes">
+      <li><label><input type="checkbox" name="pronouns" value="He/him"><span>He/him</span></label></li>
+      <li><label><input type="checkbox" name="pronouns" value="She/her"><span>She/her</span></label></li>
+      <li><label><input type="checkbox" name="pronouns" value="They/them"><span>They/them</span></label></li></ul></div></li>
+  </ul>
+  <div class="ashby-application-form-field-entry"><label class="ashby-application-form-question-title">I identify my ethnicity as (mark all that apply):</label>
+    <span><input type="checkbox" id="e1" name="Asian"><label for="e1">Asian</label></span>
+    <span><input type="checkbox" id="e2" name="Black or African American"><label for="e2">Black or African American</label></span>
+    <span><input type="checkbox" id="e3" name="White"><label for="e3">White</label></span></div>
+  <div class="ashby-application-form-field-entry"><label class="ashby-application-form-question-title">Which of our teams interest you? (Select all that apply)</label>
+    <span><input type="checkbox" id="t1" name="Payments"><label for="t1">Payments</label></span>
+    <span><input type="checkbox" id="t2" name="Growth"><label for="t2">Growth</label></span></div>
+  <div class="ashby-application-form-field-entry"><label class="ashby-application-form-question-title"><input type="checkbox" id="c1" name="consent"> I agree to the privacy notice</label></div>
+</form>
+<script type="application/json" id="expect">
+{"pronouns": "He/him", "ethnicity": "Asian", "teams interest you": ""}
+</script>
+</body></html>

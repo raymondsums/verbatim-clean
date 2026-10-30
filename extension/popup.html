@@ -1,0 +1,170 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  /* The panel's departure board look (content.js UI_CSS, 0.6.15): warm
+     grey, condensed caps for the name and buttons, mono for the rest, ink
+     for actions, and the one hot violet only on the primary button. The
+     popup is an extension page, so the bundled fonts load by URL. */
+  @font-face { font-family: "Verbatim Cond"; src: url(fonts/barlow-condensed-600.woff2) format("woff2"); font-weight: 600; }
+  @font-face { font-family: "Verbatim Cond"; src: url(fonts/barlow-condensed-700.woff2) format("woff2"); font-weight: 700; }
+  @font-face { font-family: "Verbatim Cond"; src: url(fonts/barlow-condensed-800.woff2) format("woff2"); font-weight: 800; }
+  @font-face { font-family: "Verbatim Mono"; src: url(fonts/jetbrains-mono.woff2) format("woff2"); font-weight: 100 800; }
+  :root {
+    --ground: #E4E2DE; --card: #EFEDE9; --cell: #F8F6F2;
+    --ink: #1A1917; --ink-2: #57544F; --muted: #67635D;
+    --soft: #DAD7D1; --line: #CFCCC6; --line-2: #B9B5AE;
+    --hot: #6B4EFF; --hot-hov: #5A3DF0; --hot-in: #FFFFFF;
+    --att: #A25A0E; --bad: #b42318; --good: #00875a; --focus: #1A1917;
+    --cond: "Verbatim Cond", "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+    --mono: "Verbatim Mono", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    color-scheme: light;
+  }
+  /* Dark: the night board, as in the panel */
+  :root[data-theme="dark"] {
+    --ground: #0F0E0C; --card: #171614; --cell: #1F1D1A;
+    --ink: #E6E1D7; --ink-2: #C4BEB3; --muted: #A39D93;
+    --soft: #23211E; --line: #2E2B27; --line-2: #3D3934;
+    --hot: #7D7CF0; --hot-hov: #8F8EF4; --hot-in: #FFFFFF;
+    --att: #D9B877; --bad: #f97066; --good: #3ccf91; --focus: #E6E1D7;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    width: 300px; margin: 0; padding: 12px;
+    font: 400 12px/1.5 var(--mono); color: var(--ink); background: var(--ground);
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    display: flex; align-items: center; gap: 8px; padding: 0 2px 10px; margin-bottom: 12px;
+    box-shadow: inset 0 -2px var(--ink);
+  }
+  header svg { display: none; }
+  .mark { font: 800 24px/1 var(--cond); text-transform: uppercase; letter-spacing: .01em; }
+  header .spacer { flex: 1; }
+  .lamp { width: 7px; height: 7px; border-radius: 50%; background: var(--line-2); }
+  .lamp[data-state="on"] { background: var(--good); }
+  .lamp[data-state="working"] { background: var(--att); }
+
+  .card {
+    border-radius: 8px; margin-bottom: 8px; overflow: hidden;
+    background: var(--card); box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .row {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 12px; background: none; border: 0;
+    font: inherit; color: inherit; text-align: left;
+  }
+  button.row { cursor: pointer; }
+  button.row:hover { background: var(--soft); }
+  .row .label { flex: 1; font-weight: 500; }
+  .row .value { font-size: 11px; color: var(--muted); }
+  .row .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); flex: none; }
+  .row svg.chev { width: 14px; height: 14px; flex: none; }
+
+  .switch {
+    position: relative; width: 34px; height: 20px; flex: none;
+    border-radius: 10px; border: 0; padding: 0; cursor: pointer;
+    background: var(--line-2);
+  }
+  .switch[aria-checked="true"] { background: var(--ink); }
+  .switch i {
+    position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+    border-radius: 50%; background: var(--cell); transition: left .15s;
+    box-shadow: 0 1px 2px rgba(0,0,0,.2);
+  }
+  .switch[aria-checked="true"] i { left: 16px; }
+
+  .primary {
+    display: block; width: 100%; height: 44px; margin-bottom: 8px;
+    font: 800 20px/1 var(--cond); text-transform: uppercase; letter-spacing: .05em;
+    color: var(--hot-in); background: var(--hot);
+    border: 0; border-radius: 6px; cursor: pointer;
+  }
+  .primary:hover:not(:disabled) { background: var(--hot-hov); }
+  .primary:disabled { opacity: .6; cursor: default; }
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+  #status { padding: 0 2px 8px; font-size: 11px; color: var(--muted); min-height: 0; }
+  #status:empty { display: none; }
+  #status.bad { color: var(--bad); }
+
+  .foot {
+    display: block; text-align: center; padding: 4px 0 2px;
+    font: 700 14px/1 var(--cond); text-transform: uppercase; letter-spacing: .05em;
+    color: var(--ink); text-decoration: underline; text-underline-offset: 3px;
+  }
+  .foot:hover { color: var(--ink-2); }
+  .settings summary { list-style: none; cursor: pointer; }
+  .settings summary::-webkit-details-marker { display: none; }
+  .settings-body { padding: 4px 10px 10px; display: grid; gap: 6px; }
+  .settings-body label { font-size: 11px; color: var(--muted); }
+  .settings-body input {
+    width: 100%; box-sizing: border-box; height: 30px; padding: 0 8px;
+    font: inherit; color: var(--ink); background: var(--cell);
+    border: 1px solid var(--line-2); border-radius: 4px;
+  }
+  .settings-actions { display: flex; align-items: center; gap: 8px; }
+  .settings-actions button {
+    height: 28px; padding: 0 10px; font: inherit; font-weight: 500;
+    color: var(--ink); background: var(--soft);
+    border: 1px solid var(--line-2); border-radius: 4px; cursor: pointer;
+  }
+  #server-result { font-size: 11px; color: var(--muted); }
+  #server-result.bad { color: var(--bad); }
+  @media (prefers-reduced-motion: reduce) { .switch i { transition: none; } }
+</style>
+</head>
+<body>
+  <header>
+    <svg viewBox="0 0 128 128" aria-hidden="true"><circle cx="64" cy="64" r="60" fill="#6B4EFF"/><g fill="#fff"><circle cx="47" cy="56" r="13"/><path d="M60 56c0 17-8 29-22 34l-4-7c8-4 12-10 13-18z"/><circle cx="81" cy="56" r="13"/><path d="M94 56c0 17-8 29-22 34l-4-7c8-4 12-10 13-18z"/></g></svg>
+    <span class="mark">Verbatim</span>
+    <span class="spacer"></span>
+    <span class="lamp" id="lamp" title="Verbatim server"></span>
+  </header>
+
+  <div class="card" id="update" style="display:none">
+    <button class="row" id="do-reload">
+      <span class="dot"></span>
+      <span class="label">Update waiting</span>
+      <span class="value" id="update-versions"></span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+
+  <button class="primary" id="open-panel">Open panel</button>
+  <div id="status"></div>
+
+  <div class="card">
+    <button class="row" id="add-job">
+      <span class="label">Add this job to the job board</span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <span class="label">Open on application forms</span>
+      <button class="switch" id="auto-open" role="switch" aria-checked="true"
+              aria-label="Open the panel on application forms"><i></i></button>
+    </div>
+  </div>
+
+  <details class="card settings" id="settings">
+    <summary class="row"><span class="label">Settings</span></summary>
+    <div class="settings-body">
+      <label for="server-url">Server address</label>
+      <input id="server-url" type="url" spellcheck="false" autocomplete="off"
+             placeholder="http://localhost:5053">
+      <div class="settings-actions">
+        <button type="button" id="server-save">Save and test</button>
+        <span id="server-result" role="status"></span>
+      </div>
+    </div>
+  </details>
+
+  <a class="foot" id="open-app" href="http://localhost:5053" target="_blank">Open Verbatim</a>
+  <script src="popup.js"></script>
+</body>
+</html>

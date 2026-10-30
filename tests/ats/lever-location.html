@@ -1,0 +1,41 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="job-toolkit-autotest" content="1"><title>Replica - Product Designer</title>
+<style>body { font: 14px/1.5 -apple-system, sans-serif; margin: 40px auto; max-width: 620px; } .dropdown-container { display: none; }</style></head><body>
+<!-- Lever's location box: searches on keydown after a short delay, keeps
+     only a place picked from the list, and wipes typed text on blur. -->
+<form><ul>
+  <li class="application-question"><label><div class="application-label">Full name</div><div class="application-field"><input type="text" name="name"></div></label></li>
+  <li class="application-question"><label><div class="application-label">Current location</div><div class="application-field">
+    <input class="location-input" id="location-input" type="text" name="location">
+    <input id="selected-location" type="hidden" name="selectedLocation">
+    <div class="dropdown-container"><div class="dropdown-results"></div><div class="dropdown-no-results">No location found. Try entering a different location</div></div>
+  </div></label></li>
+</ul></form>
+<script type="application/json" id="expect">
+{"Current location": "San Francisco, California, United States"}
+</script>
+<script>
+const PLACES = ["South San Francisco, California, United States", "San Francisco, California, United States", "San Francisco, Cordoba, Argentina"];
+const input = document.getElementById("location-input"), sel = document.getElementById("selected-location");
+const cont = document.querySelector(".dropdown-container"), results = document.querySelector(".dropdown-results");
+let timer;
+input.addEventListener("input", () => { cont.style.display = "flex"; });
+input.addEventListener("keydown", () => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    results.innerHTML = "";
+    const q = input.value.split(",")[0].trim().toLowerCase();
+    PLACES.filter(p => p.toLowerCase().includes(q)).forEach((p, i) => {
+      const d = document.createElement("div"); d.className = "dropdown-location"; d.id = "location-" + i; d.textContent = p; results.append(d);
+    });
+  }, 300);
+});
+input.addEventListener("blur", e => {
+  if (cont.style.display !== "none") { cont.style.display = "none"; results.innerHTML = ""; input.value = ""; sel.value = ""; }
+});
+document.addEventListener("mousedown", e => {
+  if (!e.target.classList.contains("dropdown-location")) return;
+  cont.style.display = "none"; input.value = e.target.textContent; sel.value = JSON.stringify({ name: e.target.textContent });
+  results.innerHTML = "";
+});
+</script>
+</body></html>

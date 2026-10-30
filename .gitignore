@@ -1,0 +1,55 @@
+# Everything personal lives in these. The code is the shareable part;
+# the content is not. Copy the .example files and fill them in locally.
+
+# Secrets
+.env
+
+# Your identity and your writing
+profile.json
+notes/
+content/master.md
+content/motivation.md
+content/resume.html
+
+# Everything the tool produced or learned about you
+output/
+last_capture.json
+autofill_map.json
+autofill_map.json.bak
+corrections.json
+pending_facts.json
+answers_cache.md
+answers_queue.json
+jds/
+profile.json.bak
+tests/last_report.json
+
+# Local runtime
+server.log
+*.pyc
+__pycache__/
+.DS_Store
+com.verbatim.server.plist
+com.verbatim.watch.plist
+
+# Job watcher data and logs
+data/
+logs/
+jobs/config.json
+
+# Local backups
+*.bak
+*.bak[0-9]*
+*.bak-*
+review/
+
+# Local copies of personal files, and a stray empty tracker at the root
+content/*.pre-*
+/tracker.sqlite
+
+# Python virtual environment
+.venv/
+venv/
+
+# Optional local speech model
+models/

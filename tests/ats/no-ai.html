@@ -1,0 +1,37 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="job-toolkit-autotest" content="posting"><title>Product Designer at Larkspur</title>
+<style>
+  body { font: 15px/1.55 -apple-system, Helvetica, sans-serif; color: #222; background: #fff; margin: 0; }
+  main { max-width: 640px; margin: 0 0 0 80px; padding: 32px 0 120px; }
+  @media (max-width: 900px) { main { margin: 0 auto; padding: 24px 16px 120px; } }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  .field { margin: 0 0 22px; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; }
+  input[type=text], input[type=email], textarea { width: 100%; box-sizing: border-box; padding: 9px; border: 1px solid #bbb; font: inherit; }
+  textarea { min-height: 120px; }
+  .note { background: #f4f4f0; padding: 10px 12px; border-radius: 6px; }
+</style></head><body><main>
+<section class="posting">
+  <h1>Product Designer</h1>
+  <p>Larkspur · Remote (US) · Full time</p>
+  <p>Larkspur makes scheduling software for home care nurses. Nurses use our phone app between visits to see their next patient, log what they did, and message the office. We are thirty people and ship every week.</p>
+  <p>You will own the nurse app, from research on ride-alongs to shipping. You have designed mobile tools for people at work, and you write clearly.</p>
+  <p class="note">A note on applying: we read every answer ourselves. Please do not use AI to write your answers. AI-generated applications will be rejected.</p>
+</section>
+<form id="application_form" onsubmit="event.preventDefault()">
+  <div class="field"><label for="first_name">First Name *</label><input type="text" id="first_name" name="first_name"></div>
+  <div class="field"><label for="last_name">Last Name *</label><input type="text" id="last_name" name="last_name"></div>
+  <div class="field"><label for="email">Email *</label><input type="email" id="email" name="email"></div>
+  <div class="field"><label for="phone">Phone</label><input type="text" id="phone" name="phone"></div>
+  <div class="field"><label for="q_why">Why do you want to work at Larkspur? *</label><textarea id="q_why" name="q_why"></textarea><div class="hint">In your own words, please. No AI tools.</div></div>
+  <div class="field"><label for="q_project">Tell us about a mobile tool you designed for people at work.</label><textarea id="q_project" name="q_project"></textarea></div>
+  <button type="submit">Submit application</button>
+</form>
+</main>
+<script type="application/json" id="expect">{"First Name": "Jordan", "Last Name": "Lee"}</script>
+<script type="application/json" id="expect-panel">{
+  "no_ai": ["Please do not use AI to write your answers."],
+  "instructions": [],
+  "traps": [],
+  "predraft": "off"
+}</script>
+</body></html>

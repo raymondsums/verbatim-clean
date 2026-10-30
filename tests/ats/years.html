@@ -1,0 +1,29 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="job-toolkit-autotest" content="1"><title>Replica - Product Designer</title></head><body>
+<!-- A stored number of years against ranges and threshold questions, and a
+     stored answer that is not a yes or no on a yes/no question. -->
+<form><ul>
+  <li class="application-question"><div class="application-label"><div class="text">How many professional years of experience do you have?</div></div>
+    <div class="application-field"><ul data-qa="multiple-choice">
+      <li><label><input type="radio" name="yrs" value="a"><span>0-2 years</span></label></li>
+      <li><label><input type="radio" name="yrs" value="b"><span>3-5 years</span></label></li>
+      <li><label><input type="radio" name="yrs" value="c"><span>6-8 years</span></label></li>
+      <li><label><input type="radio" name="yrs" value="d"><span>9+ years</span></label></li></ul></div></li>
+  <li class="application-question"><div class="application-label"><div class="text">Do you have more than 6 years of product design experience?</div></div>
+    <div class="application-field"><select name="more6"><option value="">Select ...</option><option>Yes</option><option>No</option></select></div></li>
+  <li class="application-question"><div class="application-label"><div class="text">Are you comfortable working core U.S. time zone hours (PST to EST)?</div></div>
+    <div class="application-field"><ul data-qa="multiple-choice">
+      <li><label><input type="radio" name="tz" value="Yes"><span>Yes</span></label></li>
+      <li><label><input type="radio" name="tz" value="No"><span>No</span></label></li></ul></div></li>
+  <li class="application-question"><div class="application-label"><div class="text">Years of experience (5+ required)</div></div>
+    <div class="application-field"><input type="text" name="yrs_text"></div></li>
+  <li class="application-question"><div class="application-label"><div class="text">Where do you live?</div></div>
+    <div class="application-field"><ul data-qa="checkboxes">
+      <li><label><input type="checkbox" name="live" value="United States"><span>United States</span></label></li>
+      <li><label><input type="checkbox" name="live" value="Canada"><span>Canada</span></label></li></ul></div></li>
+  <li class="application-question"><div class="application-label"><div class="text">Please share your current freelance availability, including start date and weekly capacity. (Example: Available now at 40 hours/week; Not available until November 2026.)</div></div>
+    <div class="application-field"><textarea name="avail"></textarea></div></li>
+</ul></form>
+<script type="application/json" id="expect">
+{"years of experience": "6-8 years", "more than 6 years": "Yes", "time zone": "", "freelance availability": "*", "5+ required": "8"}
+</script>
+</body></html>

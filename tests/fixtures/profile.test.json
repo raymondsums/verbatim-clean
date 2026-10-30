@@ -1,0 +1,71 @@
+{
+  "_note": "An invented person for tests/run_pages.py. Start the server with VERBATIM_PROFILE=tests/fixtures/profile.test.json to run the replica forms. Never use this as your own profile.",
+  "name": "Jordan Lee",
+  "title": "Product Designer",
+  "email": "jordan@example.com",
+  "phone": "555 010 0123",
+  "location": "San Francisco, CA",
+  "country": "United States",
+  "portfolio": "jordanlee.example",
+  "linkedin": "linkedin.com/in/example",
+  "github": "github.com/example",
+  "years_of_experience": "8",
+  "resume_pdf": "",
+  "pronouns": "He/him",
+  "heard_about": "LinkedIn",
+  "authorized_to_work_in_us": "Yes",
+  "requires_sponsorship": "No",
+  "located_in_us": "Yes",
+  "work_authorization": null,
+  "sponsorship": null,
+  "education": [
+    {
+      "school": "Example University School of Information",
+      "degree": "M.S. Information",
+      "degree_type": "Master's Degree",
+      "discipline": "Human Computer Interaction",
+      "start": "2016",
+      "end": "2018"
+    },
+    {
+      "school": "Example Art Institute",
+      "degree": "B.F.A. Interior Design",
+      "degree_type": "Bachelor's Degree",
+      "discipline": "Interior Design",
+      "start": "2008",
+      "end": "2012"
+    }
+  ],
+  "employment_history": [
+    {
+      "company": "Northwind",
+      "title": "Senior Product Designer",
+      "location": "San Francisco, CA",
+      "start": "Jun 2018",
+      "end": "Jun 2026"
+    }
+  ],
+  "eeo": {
+    "gender": "Male",
+    "race_ethnicity": "Asian",
+    "hispanic_latino": "No",
+    "veteran_status": "I am not a protected veteran",
+    "disability_status": "No, I don't have a disability",
+    "sexual_orientation": "Heterosexual",
+    "transgender": "No",
+    "lgbtq": "No"
+  },
+  "legal_name": "Jordan Lee",
+  "legal_first_name": "Jordan",
+  "legal_last_name": "Lee",
+  "preferred_name": "Jordan",
+  "preferred_first_name": "Jordan",
+  "preferred_last_name": "Lee",
+  "full_name_on_forms": "Jordan Lee",
+  "never_claim": [
+    "design system"
+  ],
+  "leave_out_skills": [
+    "Design Systems"
+  ]
+}

@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="job-toolkit-autotest" content="1">
+<title>Work history replica</title>
+<style>
+  body { font: 14px/1.5 -apple-system, sans-serif; margin: 40px auto; max-width: 660px; color: #26262b; }
+  fieldset { border: 1px solid #e6e6e2; border-radius: 10px; margin: 0 0 20px; padding: 16px 18px; }
+  legend { font-weight: 600; padding: 0 6px; }
+  .field { margin-bottom: 14px; }
+  label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; }
+  input, select { width: 100%; padding: 7px 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+  .pair { display: flex; gap: 12px; }
+  .pair > div { flex: 1; }
+</style>
+</head>
+<body>
+<h1>Work history replica</h1>
+<p>Education and employment as repeating blocks, the way Workday, iCIMS and
+the newer Greenhouse boards ask for them. Block one uses indexed ids,
+block two uses none at all, so both ways of working out the row get
+exercised.</p>
+
+<form>
+  <!-- education block 0: indexed ids, the common case -->
+  <fieldset>
+    <legend>Education 1</legend>
+    <div class="field">
+      <label for="school--0">School</label>
+      <input type="text" id="school--0" name="school--0">
+    </div>
+    <div class="field">
+      <label for="degree--0">Degree</label>
+      <select id="degree--0" name="degree--0">
+        <option value="">Select One</option>
+        <option>Bachelor's Degree</option>
+        <option>Master's Degree</option>
+        <option>Doctorate</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="disc--0">Field of Study</label>
+      <input type="text" id="disc--0" name="discipline--0">
+    </div>
+    <div class="pair">
+      <div class="field">
+        <label for="edustart--0">Start Year</label>
+        <input type="text" id="edustart--0" name="education_start_year--0">
+      </div>
+      <div class="field">
+        <label for="eduend--0">End Year</label>
+        <input type="text" id="eduend--0" name="education_end_year--0">
+      </div>
+    </div>
+  </fieldset>
+
+  <!-- education block 1: same questions, indexed -->
+  <fieldset>
+    <legend>Education 2</legend>
+    <div class="field">
+      <label for="school--1">School</label>
+      <input type="text" id="school--1" name="school--1">
+    </div>
+    <div class="field">
+      <label for="degree--1">Degree</label>
+      <select id="degree--1" name="degree--1">
+        <option value="">Select One</option>
+        <option>Bachelor's Degree</option>
+        <option>Master's Degree</option>
+        <option>Doctorate</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="disc--1">Field of Study</label>
+      <input type="text" id="disc--1" name="discipline--1">
+    </div>
+    <div class="pair">
+      <div class="field">
+        <label for="edustart--1">Start Year</label>
+        <input type="text" id="edustart--1" name="education_start_year--1">
+      </div>
+      <div class="field">
+        <label for="eduend--1">End Year</label>
+        <input type="text" id="eduend--1" name="education_end_year--1">
+      </div>
+    </div>
+  </fieldset>
+
+  <!-- employment blocks: no numbering anywhere, position is the only signal -->
+  <div id="jobs">
+    <fieldset class="job">
+      <legend>Work Experience 1</legend>
+      <div class="field">
+        <label>Employer</label>
+        <input type="text" name="employer">
+      </div>
+      <div class="field">
+        <label>Job Title</label>
+        <input type="text" name="jobTitle">
+      </div>
+      <div class="field">
+        <label>Location</label>
+        <input type="text" name="jobLocation">
+      </div>
+      <div class="pair">
+        <div class="field">
+          <label>From (Month)</label>
+          <input type="text" name="fromMonth">
+        </div>
+        <div class="field">
+          <label>From (Year)</label>
+          <input type="text" name="fromYear">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="job">
+      <legend>Work Experience 2</legend>
+      <div class="field">
+        <label>Employer</label>
+        <input type="text" name="employer">
+      </div>
+      <div class="field">
+        <label>Job Title</label>
+        <input type="text" name="jobTitle">
+      </div>
+      <div class="field">
+        <label>Location</label>
+        <input type="text" name="jobLocation">
+      </div>
+      <div class="pair">
+        <div class="field">
+          <label>From (Month)</label>
+          <input type="text" name="fromMonth">
+        </div>
+        <div class="field">
+          <label>From (Year)</label>
+          <input type="text" name="fromYear">
+        </div>
+      </div>
+    </fieldset>
+  </div>
+</form>
+</body>
+</html>

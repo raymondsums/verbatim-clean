@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="job-toolkit-autotest" content="steps">
+<title>Wizard replica</title>
+<style>
+  body { font: 14px/1.5 -apple-system, sans-serif; margin: 40px auto; max-width: 620px; color: #26262b; }
+  .field { margin-bottom: 18px; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; }
+  input, select { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+  .step[hidden] { display: none; }
+  .nav { margin-top: 24px; }
+  button { padding: 8px 16px; font: inherit; font-weight: 600; border: 0; border-radius: 6px; background: #5b5bd6; color: #fff; cursor: pointer; }
+  .crumb { color: #74747c; font-size: 12px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+<h1>Wizard replica</h1>
+<p>A Workday style wizard: three steps, no page load between them. Step two
+holds different fields from step one, which is what the offer box has to
+notice.</p>
+
+<div class="crumb" id="crumb">Step 1 of 3: My Information</div>
+
+<form>
+  <div class="step" id="step-1">
+    <div class="field">
+      <label for="fn">First Name</label>
+      <input type="text" id="fn" name="firstName">
+    </div>
+    <div class="field">
+      <label for="ln">Last Name</label>
+      <input type="text" id="ln" name="lastName">
+    </div>
+    <div class="field">
+      <label for="em">Email Address</label>
+      <input type="text" id="em" name="email">
+    </div>
+    <div class="field">
+      <label for="ph1">Phone Number</label>
+      <input type="text" id="ph1" name="phoneNumber">
+    </div>
+    <div class="field">
+      <label for="loc1">Current Location</label>
+      <input type="text" id="loc1" name="location">
+    </div>
+  </div>
+
+  <div class="step" id="step-2" hidden>
+    <div class="field">
+      <label for="ph">Phone Number</label>
+      <input type="text" id="ph" name="phoneNumber">
+    </div>
+    <div class="field">
+      <label for="li">LinkedIn Profile</label>
+      <input type="text" id="li" name="linkedinUrl">
+    </div>
+    <div class="field">
+      <label for="pf">Website or Portfolio</label>
+      <input type="text" id="pf" name="portfolioUrl">
+    </div>
+    <div class="field">
+      <label for="gh">GitHub</label>
+      <input type="text" id="gh" name="githubUrl">
+    </div>
+    <div class="field">
+      <label for="yrs">Years of Experience</label>
+      <input type="text" id="yrs" name="yearsExperience">
+    </div>
+  </div>
+
+  <div class="step" id="step-3" hidden>
+    <div class="field">
+      <label for="auth">Are you legally authorized to work in the United States?</label>
+      <select id="auth" name="workAuthorization">
+        <option value="">Select One</option>
+        <option>Yes</option>
+        <option>No</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="loc">Current Location</label>
+      <input type="text" id="loc" name="location">
+    </div>
+    <div class="field">
+      <label for="spon">Will you now or in the future require sponsorship?</label>
+      <select id="spon" name="sponsorship">
+        <option value="">Select One</option>
+        <option>Yes</option>
+        <option>No</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="gen">Gender</label>
+      <select id="gen" name="gender">
+        <option value="">Select One</option>
+        <option>Male</option>
+        <option>Female</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="vet">Veteran Status</label>
+      <select id="vet" name="veteranStatus">
+        <option value="">Select One</option>
+        <option>I am not a protected veteran</option>
+        <option>I am a protected veteran</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button type="button" id="next">Next</button>
+  </div>
+</form>
+
+<script>
+const TITLES = ["My Information", "My Experience", "Voluntary Disclosures"];
+let step = 1;
+document.getElementById("next").addEventListener("click", () => {
+  if (step >= 3) return;
+  document.getElementById(`step-${step}`).hidden = true;
+  step += 1;
+  document.getElementById(`step-${step}`).hidden = false;
+  document.getElementById("crumb").textContent =
+    `Step ${step} of 3: ${TITLES[step - 1]}`;
+  if (step === 3) document.getElementById("next").textContent = "Review";
+});
+</script>
+</body>
+</html>

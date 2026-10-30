@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="job-toolkit-autotest" content="1"><title>Job Application for Product Designer at Replica</title>
+<style>body { font: 14px/1.5 -apple-system, sans-serif; margin: 40px auto; max-width: 620px; } .field { margin-bottom: 18px; } label { display: block; font-weight: 600; } #us-only { display: none; }</style></head><body>
+<!-- Questions that depend on earlier answers: a follow-up box under a
+     sponsorship question, and a section that only appears once the country
+     is chosen. -->
+<form>
+  <div class="field"><label for="first_name">First Name</label><input type="text" id="first_name"></div>
+  <div class="field"><label for="spons">Do you, now or in the future, require a work permit, visa, or additional right to work support?</label>
+    <select id="spons"><option value="">Select...</option><option>Yes</option><option>No</option></select></div>
+  <div class="field"><label for="spons_more">If yes, please advise what support is needed:</label><textarea id="spons_more"></textarea></div>
+  <div class="field"><label for="country">Country of residence</label>
+    <select id="country"><option value="">Select...</option><option>Canada</option><option>United States</option></select></div>
+  <div class="field" id="us-only"><label for="auth">Are you legally authorized to work in the United States?</label>
+    <select id="auth"><option value="">Select...</option><option>Yes</option><option>No</option></select></div>
+</form>
+<script type="application/json" id="expect">
+{"require a work permit": "No", "If yes, please advise": "", "Country of residence": "United States", "legally authorized": "Yes"}
+</script>
+<script>
+document.getElementById("country").addEventListener("change", e => {
+  document.getElementById("us-only").style.display = e.target.value === "United States" ? "block" : "none";
+});
+</script>
+</body></html>

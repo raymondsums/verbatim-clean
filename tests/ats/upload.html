@@ -1,0 +1,32 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="job-toolkit-autotest" content="1"><title>Apply - Upload Test</title>
+<style>
+  .dropzone { border: 1px dashed #bbb; border-radius: 8px; padding: 40px; text-align: center; color: #2557d6; }
+  .dropzone input[type="file"] { display: none; }
+</style></head><body>
+<form>
+  <div class="field">
+    <strong>Résumé<span style="color:red">*</span></strong>
+    <div class="dropzone">Drop or select (.doc / .docx / .pdf)
+      <input type="file" name="resume-upload" accept=".doc,.docx,.pdf">
+    </div>
+    <p>The résumé will be parsed to fill in the application details</p>
+  </div>
+  <div class="field">
+    <strong>Cover letter</strong>
+    <div class="dropzone">Drop or select (.doc / .docx / .pdf)
+      <input type="file" name="cover-letter-upload" accept=".doc,.docx,.pdf">
+    </div>
+  </div>
+  <div class="field">
+    <strong>Portfolio deck (optional)</strong>
+    <div class="dropzone">Drop or select
+      <input type="file" name="other-upload">
+    </div>
+  </div>
+  <div class="field"><label for="fn">First Name</label><input type="text" id="fn" name="first_name"></div>
+  <div class="field"><label for="ln">Last Name</label><input type="text" id="ln" name="last_name"></div>
+  <div class="field"><label for="em">Email</label><input type="email" id="em" name="email"></div>
+  <div class="field"><label for="ph">Phone</label><input type="text" id="ph" name="phone"></div>
+  <div class="field"><label for="li">LinkedIn</label><input type="text" id="li" name="linkedin"></div>
+</form>
+</body></html>

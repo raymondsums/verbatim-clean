@@ -1,0 +1,8 @@
+# Verbatim needs Python 3.9 or newer.
+flask>=2.2
+python-dotenv>=1.0
+requests>=2.28
+# Optional: run the server as a background service (see README).
+gunicorn>=21.2
+# Optional: only for LLM_PROVIDER=anthropic. Uncomment, then pip install again.
+# anthropic

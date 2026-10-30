@@ -1,0 +1,49 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="job-toolkit-autotest" content="1"><title>Product Designer @ Replica</title>
+<style>
+  body { font: 14px/1.5 -apple-system, sans-serif; margin: 40px auto; max-width: 620px; }
+  .ashby-application-form-field-entry { margin-bottom: 20px; border: 0; padding: 0; }
+  .ashby-application-form-question-title { display: block; font-weight: 600; }
+  .ashby-application-form-input-yesno { position: relative; display: flex; }
+  .ashby-application-form-input-yesno input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+  button[aria-pressed="true"] { background: #222; color: #fff; }
+  .opt { display: block; } .opt input { opacity: 0; }
+</style></head><body>
+<!-- Ashby's shapes: yes/no as two buttons over a hidden checkbox, and radio
+     sets whose question is a title label and whose options carry their own
+     label[for]. -->
+<form>
+  <div class="ashby-application-form-field-entry"><label class="ashby-application-form-question-title" for="_systemfield_name">Name</label><input id="_systemfield_name" name="_systemfield_name" type="text"></div>
+  <div class="ashby-application-form-field-entry"><label class="ashby-application-form-question-title">Will you now or at any point in the future require sponsorship for work authorization in the United States?</label>
+    <div class="ashby-application-form-input-yesno"><button type="button" aria-pressed="false" data-option="yes">Yes</button><button type="button" aria-pressed="false" data-option="no">No</button><input type="checkbox" tabindex="-1" name="yn-sponsor"></div></div>
+  <div class="ashby-application-form-field-entry"><label class="ashby-application-form-question-title">Are you legally authorized to work in the United States?</label>
+    <div class="ashby-application-form-input-yesno"><button type="button" aria-pressed="false" data-option="yes">Yes</button><button type="button" aria-pressed="false" data-option="no">No</button><input type="checkbox" tabindex="-1" name="yn-auth"></div></div>
+  <fieldset class="ashby-application-form-field-entry"><label class="ashby-application-form-question-title">How did you hear about this role?</label>
+    <span class="opt"><input type="radio" id="h1" name="heard" value="LinkedIn"><label for="h1">LinkedIn</label></span>
+    <span class="opt"><input type="radio" id="h2" name="heard" value="Careers Page"><label for="h2">Careers Page</label></span>
+    <span class="opt"><input type="radio" id="h3" name="heard" value="Referral"><label for="h3">Referral</label></span></fieldset>
+  <fieldset class="ashby-application-form-field-entry"><label class="ashby-application-form-question-title">Gender</label>
+    <span class="opt"><input type="radio" id="g1" name="eeo_gender" value="Male"><label for="g1">Male</label></span>
+    <span class="opt"><input type="radio" id="g2" name="eeo_gender" value="Female"><label for="g2">Female</label></span>
+    <span class="opt"><input type="radio" id="g3" name="eeo_gender" value="Decline"><label for="g3">Decline to self-identify</label></span></fieldset>
+  <fieldset class="ashby-application-form-field-entry"><label class="ashby-application-form-question-title">Race</label>
+    <span class="opt"><input type="radio" id="r1" name="eeo_race" value="h"><label for="r1">Hispanic or Latino</label></span>
+    <span class="opt"><input type="radio" id="r2" name="eeo_race" value="a"><label for="r2">Asian (Not Hispanic or Latino)</label></span>
+    <span class="opt"><input type="radio" id="r3" name="eeo_race" value="w"><label for="r3">White (Not Hispanic or Latino)</label></span></fieldset>
+  <fieldset class="ashby-application-form-field-entry"><label class="ashby-application-form-question-title">Which office would you prefer?</label>
+    <span class="opt"><input type="radio" id="o1" name="office" value="ny"><label for="o1">New York</label></span>
+    <span class="opt"><input type="radio" id="o2" name="office" value="au"><label for="o2">Austin</label></span></fieldset>
+</form>
+<script type="application/json" id="expect">
+{"require sponsorship": "No", "legally authorized": "Yes", "How did you hear": "LinkedIn",
+ "Gender": "Male", "Race": "Asian (Not Hispanic or Latino)", "Which office": ""}
+</script>
+<script>
+for (const box of document.querySelectorAll(".ashby-application-form-input-yesno")) {
+  const cb = box.querySelector("input");
+  for (const b of box.querySelectorAll("button")) b.addEventListener("click", () => {
+    for (const x of box.querySelectorAll("button")) x.setAttribute("aria-pressed", String(x === b));
+    cb.checked = b.dataset.option === "yes";
+  });
+}
+</script>
+</body></html>

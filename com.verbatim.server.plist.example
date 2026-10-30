@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.verbatim.server</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/PATH/TO/gunicorn</string>
+        <string>--workers</string>
+        <string>1</string>
+        <string>--threads</string>
+        <string>4</string>
+        <string>--timeout</string>
+        <string>330</string>
+        <string>--graceful-timeout</string>
+        <string>30</string>
+        <string>--bind</string>
+        <string>127.0.0.1:5053</string>
+        <string>server:app</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/PATH/TO/verbatim</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <!-- Bound to localhost only, so nothing off this computer can reach
+         it. --timeout 330 because a tailoring request can hold a worker
+         for up to 300s while the model writes. -->
+    <key>StandardOutPath</key>
+    <string>/PATH/TO/verbatim/server.log</string>
+    <key>StandardErrorPath</key>
+    <string>/PATH/TO/verbatim/server.log</string>
+</dict>
+</plist>

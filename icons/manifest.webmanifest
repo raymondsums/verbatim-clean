@@ -1,0 +1,13 @@
+{
+  "name": "Verbatim",
+  "short_name": "Verbatim",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#E4E2DE",
+  "theme_color": "#E4E2DE",
+  "icons": [
+    {"src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "/icons/favicon.svg", "sizes": "any", "type": "image/svg+xml"}
+  ]
+}

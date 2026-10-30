@@ -1,0 +1,8 @@
+# Companies exempt from "lower_tags" in jobs/config.json. A role at one of
+# these keeps its normal ranking even when its product area is on that
+# list. One company per line; lines starting with # are skipped.
+# For a big company with a team inside it, put words after a colon: the role
+# counts only when its title or posting mentions one of them.
+# The lines below are only examples. Edit or delete them.
+Example Labs
+Example Corp: Research, Applied AI

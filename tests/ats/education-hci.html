@@ -1,0 +1,62 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="job-toolkit-autotest" content="1"><title>Job Application for Product Designer at Replica</title>
+<style>
+  body { font: 14px/1.5 -apple-system, sans-serif; margin: 40px auto; max-width: 620px; }
+  .field { margin-bottom: 20px; } label { display: block; font-weight: 600; }
+  .select__control { display: flex; border: 1px solid #ccc; border-radius: 4px; padding: 6px 8px; min-height: 20px; }
+  .select__value-container { flex: 1; display: grid; } .select__value-container > * { grid-area: 1 / 1; }
+  .select__placeholder { color: #888; } .select__input { border: 0; outline: 0; font: inherit; background: transparent; }
+  .select__menu { border: 1px solid #ccc; } .select__option { padding: 6px 8px; }
+  #phone-countries { display: none; }
+</style></head><body>
+<!-- The major itself wins over the Information and Other fallbacks; for the art school major, plain Design comes before Other. -->
+<div id="phone-countries" role="listbox"><div role="option">Afghanistan +93</div></div>
+<form id="application_form">
+  <div class="field"><label for="school--0" id="school--0-label">School</label><div class="rs" data-opts="Example University - Main Campus|Example University - Downtown" data-id="school--0"></div></div>
+  <div class="field"><label for="discipline--0" id="discipline--0-label">Discipline</label><div class="rs" data-opts="Information Science|Human Computer Interaction|Other" data-id="discipline--0"></div></div>
+  <div class="field"><label for="school--1" id="school--1-label">School</label><div class="rs" data-opts="Example Art Institute|Art Institute of California" data-id="school--1"></div></div>
+  <div class="field"><label for="discipline--1" id="discipline--1-label">Discipline</label><div class="rs" data-opts="Graphic Design|Design|Other" data-id="discipline--1"></div></div>
+</form>
+<script type="application/json" id="expect">
+{"School": "Example University - Main Campus", "Discipline": "Human Computer Interaction",
+ "School#2": "Example Art Institute", "Discipline#2": "Design"}
+</script>
+<script>
+for (const host of document.querySelectorAll(".rs")) {
+  const opts = host.dataset.opts.split("|"), id = host.dataset.id;
+  host.innerHTML = `<div class="select__control"><div class="select__value-container">
+    <div class="select__placeholder">Select...</div>
+    <input class="select__input" id="${id}" role="combobox" aria-expanded="false" aria-haspopup="true" autocomplete="off" aria-labelledby="${id}-label">
+  </div></div>`;
+  const ctl = host.querySelector(".select__control"), input = host.querySelector("input");
+  let menu = null, focusedBefore = false;
+  const close = () => { if (menu) menu.remove(); menu = null; input.setAttribute("aria-expanded", "false"); input.removeAttribute("aria-controls"); };
+  const render = () => {
+    if (!menu) return;
+    const q = input.value.trim().toLowerCase();
+    menu.innerHTML = "";
+    const list = document.createElement("div"); list.setAttribute("role", "listbox"); list.id = `react-select-${id}-listbox`;
+    for (const o of opts.filter(o => o.toLowerCase().includes(q))) {
+      const d = document.createElement("div"); d.className = "select__option"; d.setAttribute("role", "option"); d.textContent = o;
+      d.addEventListener("mousedown", e => { e.preventDefault(); pick(o); });
+      list.append(d);
+    }
+    menu.append(list);
+    input.setAttribute("aria-controls", list.id);
+  };
+  const pick = o => {
+    host.querySelector(".select__placeholder, .select__single-value")?.remove();
+    const sv = document.createElement("div"); sv.className = "select__single-value"; sv.textContent = o;
+    host.querySelector(".select__value-container").prepend(sv);
+    input.value = ""; close();
+  };
+  ctl.addEventListener("mousedown", () => { focusedBefore = document.activeElement === input; });
+  ctl.addEventListener("click", () => {
+    if (focusedBefore || menu) return;
+    menu = document.createElement("div"); menu.className = "select__menu"; host.append(menu);
+    input.setAttribute("aria-expanded", "true"); input.focus(); render();
+  });
+  input.addEventListener("input", render);
+  input.addEventListener("blur", () => setTimeout(() => { if (document.activeElement !== input) { input.value = ""; close(); } }, 50));
+}
+</script>
+</body></html>

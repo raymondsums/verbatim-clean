@@ -1,0 +1,19 @@
+{
+ "_how": "Companies whose public job boards the watcher looks for. Edit this to list the companies you care about, then run: python3 -m jobs.boards. names: plain company names; the script guesses each one's Greenhouse, Lever or Ashby board and keeps it only when the name checks out. boards: a company whose board you already know, as name, ats (greenhouse, lever or ashby) and slug (the part of the board link after the system's address). The entries below are only examples.",
+ "names": [
+  "Airbnb",
+  "Stripe",
+  "Figma",
+  "Notion",
+  "Duolingo",
+  "Pinterest",
+  "Reddit",
+  "Dropbox",
+  "Spotify",
+  "Etsy"
+ ],
+ "boards": [
+  {"name": "Airbnb", "ats": "greenhouse", "slug": "airbnb"},
+  {"name": "Stripe", "ats": "greenhouse", "slug": "stripe"}
+ ]
+}
