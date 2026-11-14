@@ -1,6 +1,7 @@
 """Big companies that run their own careers sites.
 
-Amazon, Apple, Microsoft, Google, Meta and Atlassian post on their own sites, not on
+Amazon, Apple, Microsoft, Google, Meta, Atlassian, Netflix, TikTok, Ford and PwC
+post on their own sites, not on
 a board the other fetchers read. Each site has a search the page itself
 calls; none is a published API, so any of them can change without notice.
 The watcher keeps count of runs that came back empty or failed, and the
@@ -22,6 +23,8 @@ import time
 
 import requests
 
+from jobs.common import is_wanted_title
+
 TIMEOUT = 20
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36")
@@ -34,7 +37,8 @@ def queries():
     roles = [r for r in load_config().get("roles") or [] if isinstance(r, str) and r.strip()]
     return tuple(roles[:5]) or EXAMPLE_QUERIES
 NAMES = {"amazon": "Amazon", "apple": "Apple", "microsoft": "Microsoft",
-         "google": "Google", "meta": "Meta", "atlassian": "Atlassian"}
+         "google": "Google", "meta": "Meta", "atlassian": "Atlassian",
+         "netflix": "Netflix", "tiktok": "TikTok", "ford": "Ford", "pwc": "PwC"}
 
 _lock = threading.Lock()
 _sessions = {}
@@ -349,9 +353,233 @@ def fetch_atlassian():
     return out
 
 
+# ── Netflix: Eightfold, like Microsoft. Its Workday board
+#    (netflix|wd108|Netflix) went empty; this is the search its careers
+#    page calls. It answers 429 to a cold call, so the page is opened first.
+#    Pages are 10 at most; the list has no description.
+
+NFLX = "https://explore.jobs.netflix.net"
+
+
+def _netflix_warm(s):
+    s.get(NFLX + "/careers", params={"domain": "netflix.com"}, timeout=TIMEOUT)
+    s.headers.update({"Accept": "application/json", "Referer": NFLX + "/careers"})
+
+
+def fetch_netflix():
+    _drop("netflix")
+    s = _session("netflix", _netflix_warm)
+    out, seen = [], set()
+    for q in queries():
+        start = 0
+        while start < 200:
+            time.sleep(1)
+            r = s.get(NFLX + "/api/apply/v2/jobs", timeout=TIMEOUT, params={
+                "domain": "netflix.com", "query": q, "start": start, "num": 10})
+            r.raise_for_status()
+            data = r.json()
+            rows = data.get("positions") or []
+            for j in rows:
+                pid = str(j.get("id") or "")
+                if not pid or pid in seen:
+                    continue
+                seen.add(pid)
+                locs = j.get("locations") or [j.get("location") or ""]
+                out.append({"pid": pid, "title": j.get("posting_name") or j.get("name") or "",
+                            "url": j.get("canonicalPositionUrl") or NFLX + "/careers/job/" + pid,
+                            "location": " / ".join(l for l in locs if l),
+                            "remote": any("remote" in (l or "").lower() for l in locs)
+                                      or (j.get("work_location_option") or "") == "remote",
+                            "posted": _iso(j.get("t_create")), "updated": "",
+                            "text": None, "emptype": ""})
+            start += 10
+            if len(rows) < 10 or start >= (data.get("count") or 0):
+                break
+    return out
+
+
+def netflix_text(pid):
+    s = _session("netflix", _netflix_warm)
+    time.sleep(1)
+    r = s.get(NFLX + "/api/apply/v2/jobs/" + pid, params={"domain": "netflix.com"}, timeout=TIMEOUT)
+    r.raise_for_status()
+    return r.json().get("job_description") or ""
+
+
+# ── TikTok: the keyless search behind lifeattiktok.com. Its
+#    SmartRecruiters board ("bytedance") holds only a couple of posts.
+#    The list carries the description but no posting date.
+
+def _tiktok_place(city):
+    parts, c = [], city or {}
+    while c:
+        name = c.get("en_name") or c.get("i18n_name") or ""
+        if name and name not in parts:
+            parts.append(name)
+        c = c.get("parent")
+    return ", ".join(parts)
+
+
+def fetch_tiktok():
+    s = _session("tiktok")
+    out, seen = [], set()
+    for q in queries():
+        offset = 0
+        while offset < 300:
+            r = s.post("https://api.lifeattiktok.com/api/v1/public/supplier/search/job/posts",
+                       timeout=TIMEOUT, headers={"website-path": "tiktok",
+                                                 "Origin": "https://lifeattiktok.com",
+                                                 "Referer": "https://lifeattiktok.com/"},
+                       json={"recruitment_id_list": [], "job_category_id_list": [],
+                             "subject_id_list": [], "location_code_list": [],
+                             "keyword": q, "limit": 50, "offset": offset})
+            r.raise_for_status()
+            data = r.json()
+            if data.get("code") not in (0, None):
+                raise ValueError("TikTok search answered code %s" % data.get("code"))
+            d = data.get("data") or {}
+            rows = d.get("job_post_list") or []
+            for j in rows:
+                pid = str(j.get("id") or "")
+                if not pid or pid in seen:
+                    continue
+                seen.add(pid)
+                loc = _tiktok_place(j.get("city_info"))
+                out.append({"pid": pid, "title": (j.get("title") or "").strip(),
+                            "url": "https://lifeattiktok.com/search/" + pid,
+                            "location": loc, "remote": "remote" in loc.lower(),
+                            "posted": "", "updated": "",
+                            "text": "\n\n".join(x for x in (j.get("description"), j.get("requirement")) if x),
+                            "emptype": (j.get("recruit_type") or {}).get("en_name") or ""})
+            offset += 50
+            if len(rows) < 50 or offset >= (d.get("count") or 0):
+                break
+    return out
+
+
+# ── Ford: Oracle Recruiting Cloud. The search behind its careers
+#    site answers without a session. A keyword search ranks by relevance and
+#    runs on into unrelated jobs, so each query
+#    stops at FORD_MAX. The list has no description.
+
+FORD = "https://efds.fa.em5.oraclecloud.com"
+FORD_API = FORD + "/hcmRestApi/resources/latest/"
+FORD_MAX = 100
+
+
+def fetch_ford():
+    out, seen = [], set()
+    for q in queries():
+        offset = 0
+        while offset < FORD_MAX:
+            r = requests.get(FORD_API + "recruitingCEJobRequisitions", timeout=TIMEOUT, params={
+                "onlyData": "true", "expand": "requisitionList.secondaryLocations",
+                "finder": 'findReqs;siteNumber=CX_1,keyword="%s",limit=50,offset=%d,sortBy=RELEVANCY'
+                          % (q, offset)})
+            r.raise_for_status()
+            items = r.json().get("items") or [{}]
+            rows = items[0].get("requisitionList") or []
+            for j in rows:
+                pid = str(j.get("Id") or "")
+                if not pid or pid in seen:
+                    continue
+                seen.add(pid)
+                locs = [j.get("PrimaryLocation") or ""] + [
+                    x.get("Name") or "" for x in j.get("secondaryLocations") or []]
+                out.append({"pid": pid, "title": (j.get("Title") or "").strip(),
+                            "url": "%s/hcmUI/CandidateExperience/en/sites/CX_1/job/%s" % (FORD, pid),
+                            "location": " / ".join(l for l in locs if l),
+                            "remote": j.get("WorkplaceTypeCode") == "ORA_REMOTE",
+                            "posted": j.get("PostedDate") or "", "updated": "",
+                            "text": None, "emptype": ""})
+            offset += 50
+            if len(rows) < 50:
+                break
+    return out
+
+
+def ford_text(pid):
+    r = requests.get(FORD_API + "recruitingCEJobRequisitionDetails", timeout=TIMEOUT, params={
+        "expand": "all", "onlyData": "true", "finder": 'ById;Id="%s",siteNumber=CX_1' % pid})
+    r.raise_for_status()
+    d = (r.json().get("items") or [{}])[0]
+    return _plain_html(" ".join(d.get(k) or "" for k in (
+        "ExternalDescriptionStr", "ExternalResponsibilitiesStr", "ExternalQualificationsStr")))
+
+
+# ── PwC: Workday, read here and not as a board. The board reader
+#    takes the broad search, and PwC lists well over a thousand hits for it
+#    worldwide, most of them not the role you want. Narrow searches on each career
+#    site, a second apart, find the real ones. A job can be on two sites, so
+#    title and place make it one. The pid carries the site its text is read from.
+
+PWC = "https://pwc.wd3.myworkdayjobs.com"
+PWC_SITES = ("US_Experienced_Careers", "Global_Experienced_Careers", "Global_Campus_Careers")
+
+
+def _pwc_queries():
+    """The configured roles; with the example design roles, two more
+    narrow design searches."""
+    q = queries()
+    return q + ("experience design", "ux") if q == EXAMPLE_QUERIES else q
+PWC_PAGE = 20
+PWC_PAGES = 2
+
+
+def _pwc_job(site, path):
+    r = requests.get("%s/wday/cxs/pwc/%s%s" % (PWC, site, path), timeout=TIMEOUT,
+                     headers={"Accept": "application/json"})
+    r.raise_for_status()
+    return r.json().get("jobPostingInfo") or {}
+
+
+def fetch_pwc():
+    out, paths, seen = [], set(), set()
+    for site in PWC_SITES:
+        for q in _pwc_queries():
+            for page in range(PWC_PAGES):
+                time.sleep(1)
+                r = requests.post("%s/wday/cxs/pwc/%s/jobs" % (PWC, site), timeout=TIMEOUT, json={
+                    "appliedFacets": {}, "limit": PWC_PAGE, "offset": page * PWC_PAGE, "searchText": q})
+                r.raise_for_status()
+                rows = r.json().get("jobPostings") or []
+                for j in rows:
+                    path, title = j.get("externalPath") or "", (j.get("title") or "").strip()
+                    if not path or path in paths:
+                        continue
+                    paths.add(path)
+                    loc = j.get("locationsText") or ""
+                    if re.match(r"\d+ locations", loc, re.I):
+                        # Only a wanted title is worth the extra call.
+                        if not is_wanted_title(title):
+                            continue
+                        time.sleep(1)
+                        info = _pwc_job(site, path)
+                        loc = " / ".join(x for x in [info.get("location") or ""]
+                                         + list(info.get("additionalLocations") or []) if x)
+                    key = (title.lower(), loc.lower())
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    out.append({"pid": site + path, "title": title,
+                                "url": "%s/%s%s" % (PWC, site, path), "location": loc,
+                                "remote": "remote" in loc.lower(), "posted": "", "updated": "",
+                                "text": None, "emptype": ""})
+                if len(rows) < PWC_PAGE:
+                    break
+    return out
+
+
+def pwc_text(pid):
+    site, _, path = pid.partition("/")
+    return _plain_html(_pwc_job(site, "/" + path).get("jobDescription") or "")
+
+
 FETCH = {"amazon": fetch_amazon, "apple": fetch_apple, "microsoft": fetch_microsoft,
-         "google": fetch_google, "meta": fetch_meta, "atlassian": fetch_atlassian}
-TEXT = {"apple": apple_text, "microsoft": microsoft_text, "meta": meta_text}
+         "google": fetch_google, "meta": fetch_meta, "atlassian": fetch_atlassian,
+         "netflix": fetch_netflix, "tiktok": fetch_tiktok, "ford": fetch_ford, "pwc": fetch_pwc}
+TEXT = {"apple": apple_text, "microsoft": microsoft_text, "meta": meta_text,
+        "netflix": netflix_text, "ford": ford_text, "pwc": pwc_text}
 
 
 def boards():

@@ -1,5 +1,5 @@
 """Big employers' own job systems: Intuit (Radancy TalentBrew),
-Rivian (iCIMS on Jibe), Joby (iCIMS classic), EA (Avature), Yelp and
+Rivian (iCIMS on Jibe), Joby (iCIMS classic), EA and Harman (Avature), Yelp and
 Scopely (Phenom).
 
 Their terms discourage robots on their own sites, so this is off unless
@@ -265,6 +265,7 @@ BOARDS = [("Intuit", "talentbrew", "jobs.intuit.com"),
           ("Rivian", "jibe", "careers.rivian.com"),
           ("Joby Aviation", "icims", "careers-jobyaviation.icims.com"),
           ("Electronic Arts", "avature", "jobs.ea.com|/en_US/careers"),
+          ("Harman", "avature", "jobsearch.harman.com|/en_US/careers"),
           ("Yelp", "phenom", "www.yelp.careers|/us/en"),
           ("Scopely", "phenom", "careers.scopely.com|/us/en")]
 
