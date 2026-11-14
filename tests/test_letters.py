@@ -37,7 +37,7 @@ def run(monkeypatch):
         f.write("Source: https://x.test/1\n\n" + JD)
     with open(os.path.join(d, "meta.json"), "w") as f:
         json.dump({"company": "Northwind", "role": "Designer"}, f)
-    letters.start(d, "Dear team,\n\nI led the checkout flow.\n\nBest regards,\nRay")
+    letters.start(d, "Dear team,\n\nI led the checkout flow.\n\nBest regards,\nJordan")
     made = []
     monkeypatch.setattr(server, "render_pdf", lambda md, path, title="": (made.append(md), open(path, "w").write("pdf")))
     monkeypatch.setattr(server, "load_profile", lambda: {"name": "Jordan"})
@@ -61,13 +61,13 @@ def test_review_revise_approve(run, monkeypatch):
     assert not os.path.exists(os.path.join(d, "cover-letter.pdf"))
     # The user's edit in the box is kept as its own version before the note runs.
     st = c.post("/api/letter/northwind-designer/revise",
-                json={"text": "Dear team,\n\nI led the checkout flow at Bluebird.\n\nBest regards,\nRay", "note": "shorter"}).get_json()
+                json={"text": "Dear team,\n\nI led the checkout flow at Bluebird.\n\nBest regards,\nJordan", "note": "shorter"}).get_json()
     assert [v["source"] for v in st["versions"]] == ["draft", "edit", "note"]
     assert "at Bluebird" in seen["prompt"] and "shorter" in seen["prompt"] and JD in seen["prompt"]
-    assert st["versions"][-1]["text"].endswith("Best regards,\nRay")
+    assert st["versions"][-1]["text"].endswith("Best regards,\nJordan")
     assert c.post("/api/letter/northwind-designer/revise", json={"text": "", "note": " "}).status_code == 400
     # Approve builds the PDF from exactly the text sent.
-    st = c.post("/api/letter/northwind-designer/approve", json={"text": "Final words.\n\nBest regards,\nRay"}).get_json()
+    st = c.post("/api/letter/northwind-designer/approve", json={"text": "Final words.\n\nBest regards,\nJordan"}).get_json()
     assert st["approved"] == 4 and "Final words." in made[-1]
     assert os.path.exists(os.path.join(d, "cover-letter.pdf"))
     monkeypatch.setattr(answers, "extract_lessons", lambda draft, final, existing=(), question="":
@@ -90,9 +90,9 @@ def test_older_runs_open_as_an_approved_body(run):
     old = os.path.join(server.OUTPUT_DIR, "old-run")
     os.makedirs(old)
     with open(os.path.join(old, "cover-letter.md"), "w") as f:
-        f.write("# Jordan\n\nProduct Designer\n\nDear team,\n\nHello there.\n\nBest regards,\nRay\n\nSF · jordan@x.test\n")
+        f.write("# Jordan\n\nProduct Designer\n\nDear team,\n\nHello there.\n\nBest regards,\nJordan\n\nSF · jordan@x.test\n")
     st = c.get("/api/letter/old-run").get_json()
-    assert st["approved"] == 1 and st["versions"][0]["text"] == "Dear team,\n\nHello there.\n\nBest regards,\nRay"
+    assert st["approved"] == 1 and st["versions"][0]["text"] == "Dear team,\n\nHello there.\n\nBest regards,\nJordan"
 
 
 def test_a_failed_page_run_reports_error_not_running_or_done(run, monkeypatch):
