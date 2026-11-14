@@ -174,7 +174,18 @@ _NON_US = re.compile(
     r"\b(canada|uk|united kingdom|london|ireland|dublin|germany|berlin|france|paris|"
     r"spain|portugal|netherlands|amsterdam|poland|india|bangalore|bengaluru|"
     r"singapore|japan|tokyo|australia|sydney|brazil|mexico|argentina|colombia|"
-    r"emea|apac|latam|south america|europe|israel|tel aviv|korea|seoul|china|toronto|vancouver)\b", re.I)
+    r"emea|apac|latam|south america|europe|israel|tel aviv|korea|seoul|china|toronto|vancouver|"
+    # More countries and capitals. City names that are also US towns
+    # (Vienna, Athens, Rome, Geneva, Hamburg) are left out on purpose.
+    r"sweden|stockholm|austria|switzerland|zurich|denmark|copenhagen|norway|oslo|"
+    r"finland|helsinki|belgium|brussels|italy|milan|czechia|czech republic|prague|"
+    r"hungary|budapest|romania|bucharest|greece|estonia|tallinn|lithuania|vilnius|"
+    r"latvia|riga|ukraine|kyiv|turkey|t\u00fcrkiye|istanbul|croatia|serbia|belgrade|"
+    r"bulgaria|slovakia|slovenia|luxembourg|munich|warsaw|krakow|madrid|"
+    r"barcelona|lisbon|new zealand|south africa|nigeria|kenya|egypt|uae|"
+    r"united arab emirates|dubai|saudi arabia|pakistan|philippines|manila|malaysia|"
+    r"kuala lumpur|thailand|bangkok|vietnam|indonesia|jakarta|taiwan|taipei|hong kong|"
+    r"chile|santiago|peru|uruguay|costa rica|guatemala)\b", re.I)
 _ANYWHERE = re.compile(r"\b(anywhere|worldwide|global|globally)\b", re.I)
 
 
@@ -209,9 +220,11 @@ def location_ok(loc, remote_flag, cfg, title=""):
             return True
         if not re.sub(r"\bremote\b|[^a-z]", "", l.lower()):
             return True  # just "Remote", nowhere named
-    # "US / Canada" is a US posting that also takes Canada.
+    # "US / Canada" is a US posting that also takes Canada, and some boards
+    # write "US - United States".
     if cfg.get("count_bare_united_states") and re.fullmatch(
-            r"\s*(us|usa|u\.s\.|united states( of america)?)(\s*(/|&|,|or|and)\s*canada)?\s*",
+            r"\s*((us|usa)\s*[-\u2013]\s*)?(us|usa|u\.s\.|united states( of america)?)"
+            r"(\s*(/|&|,|or|and)\s*canada)?\s*",
             l, re.I):
         return True
     return False
@@ -327,11 +340,19 @@ def _workday_search():
     return roles[0] if roles else "design"
 
 
+WORKDAY_MAX, WORKDAY_PAUSE = 2000, 0.3
+
+
 def fetch_workday(slug):
     host, tenant, site = _workday_base(slug)
-    # Only the first page carries the total; later pages say 0.
+    # Only the first page carries the total; later pages say 0. Every page is
+    # read, up to the 2,000 Workday will list: results come by relevance, so
+    # a matching role can sit hundreds deep on a big board. A short pause
+    # between pages keeps the bigger boards polite.
     out, offset, total = [], 0, None
-    while offset < 200:
+    while offset < WORKDAY_MAX:
+        if offset:
+            time.sleep(WORKDAY_PAUSE)
         r = session().post("%s/wday/cxs/%s/%s/jobs" % (host, tenant, site),
                            json={"appliedFacets": {}, "limit": 20, "offset": offset,
                                  "searchText": _workday_search()}, timeout=TIMEOUT)
@@ -1345,6 +1366,67 @@ def dry_run():
         print("  " + f)
 
 
+def drop_boards(keys, why="dead"):
+    """Stop watching these boards ("ats:slug") and close their open jobs.
+
+    A board that fails every run never closes its jobs, because closing
+    happens only on a good read, so a company that moved to a new board
+    shows its old jobs beside the new ones. Hand-added boards are taken out
+    of boards_extra.json; found ones stay in their file, marked unverified so
+    the poller skips them. Jobs you added by hand stay open."""
+    want = {k.strip().lower() for k in keys if k.strip()}
+    lock = open(LOCK_PATH, "w")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        lock.close()
+        raise RuntimeError("a watch run is going; try again when it ends")
+    try:
+        out = {"files": {}, "closed": 0, "boards": sorted(want)}
+        for path in (boards_mod.BOARDS_PATH, boards_mod.MORE_PATH,
+                     boards_mod.WORKDAY_PATH, boards_mod.BOARDS_EXTRA_PATH):
+            if not os.path.exists(path):
+                continue
+            with open(path) as f:
+                data = json.load(f)
+            keep, n = [], 0
+            for b in data.get("boards", []):
+                if ("%s:%s" % (b.get("ats"), b.get("slug"))).lower() not in want:
+                    keep.append(b)
+                elif path == boards_mod.BOARDS_EXTRA_PATH:
+                    n += 1
+                else:
+                    if b.get("verified"):
+                        n += 1
+                    b["verified"] = False
+                    b["dropped"] = "%s %s" % (why, time.strftime("%Y-%m-%d"))
+                    keep.append(b)
+            if n:
+                data["boards"] = keep
+                extra = path == boards_mod.BOARDS_EXTRA_PATH
+                with open(path + ".tmp", "w") as f:   # each file keeps its own layout
+                    json.dump(data, f, indent=2 if extra else 1, ensure_ascii=not extra)
+                    if extra:
+                        f.write("\n")
+                os.replace(path + ".tmp", path)
+                out["files"][os.path.basename(path)] = n
+        con = db()
+        now = _now()
+        for k in want:
+            ats, _, slug = k.partition(":")
+            cur = con.execute(
+                "UPDATE jobs SET closed=? WHERE ats=? AND lower(slug)=? "
+                "AND closed IS NULL AND added IS NULL", (now, ats, slug))
+            out["closed"] += cur.rowcount
+            con.execute("DELETE FROM boards WHERE lower(key)=?", (k,))
+        con.commit()
+        con.close()
+        return out
+    finally:
+        fcntl.flock(lock, fcntl.LOCK_UN)
+        lock.close()
+
+
 if __name__ == "__main__":
     # The server loads .env itself. Run on its own (a LaunchAgent or cron),
     # the watcher needs it too: it holds the AI settings that a scheduler
@@ -1358,6 +1440,9 @@ if __name__ == "__main__":
         c = db()
         print("scored", score_backfill(c, log=lambda s: print(s, flush=True)))
         c.close()
+    elif "--drop-board" in sys.argv:
+        # python3 -m jobs.watch --drop-board greenhouse:oldslug lever:another
+        print(json.dumps(drop_boards(sys.argv[sys.argv.index("--drop-board") + 1:])))
     elif "--dry" in sys.argv:
         dry_run()
     elif "--list" in sys.argv:

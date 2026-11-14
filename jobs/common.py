@@ -101,6 +101,11 @@ _DESIGN = re.compile(
     r"(staff|principal|senior|sr\.?|lead|founding) designer|"
     r"visual designer|web designer|digital designer|interface designer|"
     r"service designer|content designer|ux writer|design technologist|"
+    r"member of (the )?design staff|"
+    # Titles written the other way round: "Lead, Design", "Director,
+    # Product Design". Only when Design ends the title or its first part:
+    # "Manager, Design and Construction" is a building job.
+    r"\b(lead|head|(?<!creative )director|manager|vp),\s*(product\s+|ux\s+)?design\s*($|[-\u2013\u2014(\u2022|])|"
     r"\bdesigner\b",
     re.I)
 
@@ -108,13 +113,13 @@ _DESIGN = re.compile(
 _NEVER = re.compile(
     r"\bintern\b|internship|co-op|graphic|motion designer|brand designer|"
     r"marketing designer|communications? designer|video|interior|fashion|"
-    r"apparel|footwear|textile|jewelry|hardware|mechanical|electrical|"
+    r"apparel|footwear|textile|jewelry|mechanical|electrical|"
     r"instructional|learning design|curriculum|game designer|level designer|"
     r"landscape|urban|architect(?!ure)|lighting|packaging|\bprint\b|"
     r"civil|structural|circuit|asic|chip|silicon|pcb|rf |analog|"
     r"kitchen|floral|merchandis|set designer|costume|"
     r"brand design|creative design|creative services|production designer|"
-    r"copywriter|ux writer|data center|data hall|recruit|"
+    r"copywriter|ux writer|data center|data hall|"
     r"brand marketing|brand advertising|marketing design|\bmotion\b|"
     r"handbag|accessories|presentation designer|investment designer|"
     r"systems? designer|policy design|network planning|technology design|"
@@ -141,6 +146,11 @@ _KEEP_ANYWAY = re.compile(
 # title also says product, UX or experience.
 _PHYSICAL = re.compile(r"industrial|\bcmf\b|color,? material", re.I)
 _PHYSICAL_OK = re.compile(r"product|\bux\b|experience", re.I)
+# "Hardware" titles are electronics design unless the title also says UX,
+# user experience or product designer ("User Experience Designer: Hardware
+# Systems").
+_HARDWARE = re.compile(r"hardware", re.I)
+_HARDWARE_OK = re.compile(r"\bux\b|user experience|product designer", re.I)
 
 
 def _phrase(words):
@@ -152,6 +162,41 @@ def _phrase(words):
                                for w in words), re.I)
 
 
+# A role's field, for titles that name the field instead of the job:
+# "Lead, Design" or "Member of Design Staff" for "product designer",
+# "Director, Engineering" for "software engineer".
+_FIELD = [(r"designer$", "design"), (r"engineer$", "engineering"), (r"scientist$", "science"),
+          (r"researcher$", "research"), (r"writer$", "writing"), (r"analyst$", "analytics"),
+          (r"developer$", "development"), (r"marketer$", "marketing")]
+
+
+def _fields(words):
+    """Field forms of the roles: the whole phrase and its last word."""
+    out = set()
+    for w in words or []:
+        if not isinstance(w, str) or not w.strip():
+            continue
+        w = w.strip().lower()
+        for pat, field in _FIELD:
+            if re.search(pat, w):
+                out.add(re.sub(pat, field, w))
+                out.add(field)
+    return sorted(out, key=len, reverse=True)
+
+
+def _field_titles(words):
+    """Titles written the other way round ("Lead, Design") and "Member of
+    Design Staff", for whatever roles are set. Only when the field ends the
+    title or its first part, so "Manager, Design and Construction" stays out."""
+    fields = _fields(words)
+    if not fields:
+        return None
+    f = "|".join(re.escape(x) for x in fields)
+    return re.compile(
+        r"\b(lead|head|(?<!creative )director|manager|vp),\s*(%s)\s*($|[-\u2013\u2014(\u2022|,])|"
+        r"\bmember of (the )?(%s) staff\b" % (f, f), re.I)
+
+
 _MATCHER = {}
 
 
@@ -161,7 +206,8 @@ def title_matcher(cfg=None):
     cfg = load_config() if cfg is None else cfg
     key = json.dumps([cfg.get("roles") or [], cfg.get("exclude") or []], sort_keys=True)
     if key not in _MATCHER:
-        _MATCHER[key] = (_phrase(cfg.get("roles")), _phrase(cfg.get("exclude")))
+        _MATCHER[key] = (_phrase(cfg.get("roles")), _phrase(cfg.get("exclude")),
+                         _field_titles(cfg.get("roles")))
     return _MATCHER[key]
 
 
@@ -171,12 +217,12 @@ def is_wanted_title(title, cfg=None):
     With "roles" set in config.json, a title must contain one of them and
     none of "exclude". Without roles, the example design test below runs
     (and "exclude" still applies)."""
-    roles, exclude = title_matcher(cfg)
+    roles, exclude, fields = title_matcher(cfg)
     t = title or ""
     if exclude is not None and exclude.search(t):
         return False
     if roles is not None:
-        return bool(roles.search(t))
+        return bool(roles.search(t) or (fields is not None and fields.search(t)))
     return is_design_title(t)
 
 
@@ -186,6 +232,8 @@ def is_design_title(title):
     if not _DESIGN.search(t) or _NEVER.search(t):
         return False
     if _PHYSICAL.search(t) and not _PHYSICAL_OK.search(t):
+        return False
+    if _HARDWARE.search(t) and not _HARDWARE_OK.search(t):
         return False
     if _NOT_DESIGN.search(t) and not _KEEP_ANYWAY.search(t):
         return False

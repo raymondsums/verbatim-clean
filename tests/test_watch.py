@@ -623,3 +623,104 @@ def test_remote_from_another_country():
     assert watch.location_ok("Remote, worldwide", True, cfg)
     assert not watch.location_ok("Remote, United States", True, cfg)
     assert not watch.location_ok("Remote, Germany", True, dict(cfg, allow_remote=False))
+
+
+# ── Title, place and board fixes ported from the main app
+
+def test_titles_written_the_other_way_round_follow_the_roles():
+    design = {"roles": ["product designer"], "exclude": []}
+    for t in ("Lead, Design", "Director, Product Design", "Member of Design Staff"):
+        assert common.is_wanted_title(t, design), t
+    for t in ("Manager, Design and Construction", "Creative Director, Design", "Lead, Engineering"):
+        assert not common.is_wanted_title(t, design), t
+    eng = {"roles": ["software engineer"], "exclude": []}
+    assert common.is_wanted_title("Director, Engineering", eng)
+    assert common.is_wanted_title("Member of Engineering Staff", eng)
+    assert not common.is_wanted_title("Lead, Design", eng)
+
+
+def test_example_titles_keep_recruiting_and_hardware_ux():
+    assert common.is_design_title("Staff Product Designer (Visual Design & Systems), Autonomous Recruiting")
+    assert not common.is_design_title("Recruiter, Product Design")
+    assert common.is_design_title("User Experience Designer: Hardware Systems")
+    assert not common.is_design_title("Hardware Designer")
+    assert common.is_design_title("Lead, Design")
+
+
+def test_us_dash_united_states_counts():
+    cfg = {"cities": ["Springfield"], "allow_remote": True, "count_bare_united_states": True}
+    assert watch.location_ok("US - United States", False, cfg)
+    assert not watch.location_ok("UK - United Kingdom", False, cfg)
+
+
+def test_more_countries_are_outside_the_us_for_remote():
+    cfg = {"cities": ["Springfield"], "allow_remote": True, "remote_country": "United States"}
+    for place in ("Sweden", "Austria", "Switzerland", "Zurich", "Philippines", "Hong Kong"):
+        assert not watch.location_ok(place, True, cfg), place
+    for place in ("Remote", "United States", "Remote - US", "Anywhere"):
+        assert watch.location_ok(place, True, cfg), place
+    assert watch.location_ok("Springfield, IL", False, cfg)
+
+
+def test_workday_reads_past_the_first_ten_pages(monkeypatch):
+    calls = []
+
+    class R:
+        def __init__(self, offset):
+            self.offset = offset
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            page = [] if self.offset >= 500 else [
+                {"title": "Product Designer %d" % (self.offset + i), "externalPath": "/job/%d" % (self.offset + i),
+                 "locationsText": "Remote"} for i in range(20)]
+            return {"total": 500 if self.offset == 0 else 0, "jobPostings": page}
+
+    class Sess:
+        def post(self, url, json=None, timeout=None):
+            calls.append(json["offset"])
+            return R(json["offset"])
+
+    monkeypatch.setattr(watch, "session", lambda: Sess())
+    monkeypatch.setattr(watch, "WORKDAY_PAUSE", 0)
+    jobs = watch.fetch_workday("example|wd1|Careers")
+    assert len(jobs) == 500 and max(calls) == 480
+
+
+def test_dropping_a_board_closes_its_jobs_and_stops_polling(tmp_path, monkeypatch):
+    from jobs import boards as boards_mod
+    found = {"boards": [{"employer": "oldco", "ats": "greenhouse", "slug": "oldco", "verified": True},
+                        {"employer": "other", "ats": "lever", "slug": "other", "verified": True}]}
+    extra = {"_how": "x", "boards": [{"employer": "Moved Co", "ats": "greenhouse", "slug": "movedco"}]}
+    paths = {}
+    for name, data in (("boards.json", found), ("boards_extra.json", extra)):
+        p = tmp_path / name
+        p.write_text(json.dumps(data))
+        paths[name] = str(p)
+    monkeypatch.setattr(boards_mod, "BOARDS_PATH", paths["boards.json"])
+    monkeypatch.setattr(boards_mod, "BOARDS_EXTRA_PATH", paths["boards_extra.json"])
+    monkeypatch.setattr(boards_mod, "MORE_PATH", str(tmp_path / "none1.json"))
+    monkeypatch.setattr(boards_mod, "WORKDAY_PATH", str(tmp_path / "none2.json"))
+    monkeypatch.setattr(watch, "LOCK_PATH", str(tmp_path / "watch.lock"))
+    monkeypatch.setattr(watch, "DB_PATH", str(tmp_path / "jobs.sqlite"), raising=False)
+    monkeypatch.setattr(common, "DB_PATH", str(tmp_path / "jobs.sqlite"), raising=False)
+    con = watch.db()
+    for jid, ats, slug, added in (("greenhouse:oldco:1", "greenhouse", "oldco", None),
+                                  ("greenhouse:oldco:2", "greenhouse", "oldco", "2026-01-01"),
+                                  ("greenhouse:movedco:1", "greenhouse", "movedco", None),
+                                  ("lever:other:1", "lever", "other", None)):
+        con.execute("INSERT INTO jobs (id, ats, slug, title, status, added) VALUES (?,?,?,?,?,?)",
+                    (jid, ats, slug, "Product Designer", "new", added))
+    con.commit()
+    con.close()
+    out = watch.drop_boards(["greenhouse:oldco", "greenhouse:movedco"])
+    assert out["closed"] == 2
+    con = watch.db()
+    still = {r[0] for r in con.execute("SELECT id FROM jobs WHERE closed IS NULL")}
+    con.close()
+    assert still == {"greenhouse:oldco:2", "lever:other:1"}
+    assert [b["slug"] for b in json.loads((tmp_path / "boards_extra.json").read_text())["boards"]] == []
+    kept = json.loads((tmp_path / "boards.json").read_text())["boards"]
+    assert [b["verified"] for b in kept] == [False, True]
