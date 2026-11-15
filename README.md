@@ -1,5 +1,11 @@
 # Verbatim
 
+I built a job application helper that runs on your own computer. Your name, dates and links go into forms exactly as you wrote them, and nothing is sent until you press the button.
+
+![Verbatim filling a job application](docs/hero.gif)
+
+More of my work: [raysums.com](https://raysums.com)
+
 A job application helper that runs on your own computer. It tailors your
 resume and cover letter to a posting, fills application forms from a
 Chrome extension, offers the answers you wrote last time, and keeps a
